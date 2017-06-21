@@ -1,6 +1,8 @@
 fs = require 'fs'
 path = require 'path'
 
+DEFAULT_TOKEN = process.env.HUBOT_GH_ISSUES_DEFAULT_TOKEN
+
 module.exports = (robot, scripts) ->
   scriptsPath = path.resolve(__dirname, 'src')
   fs.exists scriptsPath, (exists) ->
@@ -17,6 +19,7 @@ module.exports = (robot, scripts) ->
     user = robot.brain.userForId msg.envelope.user.id
     token = robot.vault.forUser(user).get(robot.vault.key)
     return token if token?
+    return DEFAULT_TOKEN if DEFAULT_TOKEN?
     msg.reply "I don't know your GitHub token. \nPlease generate one with the \"repo\" scope on https://github.com/settings/tokens and set it in a private message to me with the command: \"github token set <github_personal_access_token>\""
 
   robot.ghissues =
