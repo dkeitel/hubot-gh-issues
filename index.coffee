@@ -39,7 +39,7 @@ module.exports = (robot, scripts) ->
           unless err?
             reply = "Found issues #{data.total_count} in #{repo}\n"
             for issue in data.items
-              reply += "##{issue.number}: #{issue.title} (#{issue.state}) - #{issue.url}\n"
+              reply += "##{issue.number}: #{issue.title} (#{issue.state}) - #{issue.html_url}\n"
             msg.reply reply
           else
             msg.reply "Error from GitHub API: #{err.body.message}"
