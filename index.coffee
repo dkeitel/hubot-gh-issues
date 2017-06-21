@@ -77,7 +77,7 @@ module.exports = (robot, scripts) ->
         issue = client.issue repo, id
         issue.info (err, data, headers) ->
           unless err?
-            msg.reply "Issue ##{id} in #{repo} - #{data.title} - #{data.html_url}"
+            msg.reply "Issue ##{id} in #{repo} - #{data.title} (#{data.state}) - #{data.html_url}"
           else
             msg.reply "Error from GitHub API: #{err.body.message}"
             return err
