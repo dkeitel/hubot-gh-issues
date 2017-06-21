@@ -10,6 +10,7 @@
 #   octonode
 #
 # Commands:
+#   hubot github search issues "<query>" (assignee "<assignee>") (state "<state>") (in "(<owner>/)<repo>") (with labels "<label1>,<label2>,..") - Searches for issues
 #   hubot github open issue "<title>" (about "<body>") (in "(<owner>/)<repo>") (with labels "<label1>,<label2>,..") - Opens a new issue
 #   hubot github show issue #<issue_number> (in (<owner>/)<repo>)
 #   hubot github close issue #<issue_number> (in (<owner>/)<repo>)
@@ -22,6 +23,18 @@ DEFAULT_OWNER = process.env.HUBOT_GH_ISSUES_DEFAULT_OWNER
 DEFAULT_REPO = process.env.HUBOT_GH_ISSUES_DEFAULT_REPO
 
 module.exports = (robot) ->
+  robot.respond /(?:github|gh) (?:search) issues "([^"]+)"(?: (?:assignee) "([^"]+)")?(?: (?:state) "([^"]+)")?(?: in "([\w\d-_]+)(?:\/([\w\d-_]+))?")?(?: (?:with )?(?:tags|tag|labels|label|tagged) "([\w\d,-_]+)")?$/i, id: 'gh-issues.search', (msg) ->
+    query = msg.match[1] || ''
+    assignee = msg.match[2] || ''
+    state = msg.match[3] || ''
+    repo = if msg.match[4]? and msg.match[5]?
+      "#{msg.match[4]}/#{msg.match[5]}"
+    else if msg.match[4]?
+      "#{DEFAULT_OWNER}/#{msg.match[4]}"
+    else
+      "#{DEFAULT_OWNER}/#{DEFAULT_REPO}"
+    labels = if msg.match[6]? then msg.match[6].split(',') else []
+    robot.ghissues.searchIssues msg, repo, assignee, state, labels, query
 
   robot.respond /(?:github|gh) (?:open|create|new) issue "([^"]+)"(?: (?:about|regarding|re|body|description) "([^"]+)")?(?: in "([\w\d-_]+)(?:\/([\w\d-_]+))?")?(?: (?:with )?(?:tags|tag|labels|label|tagged) "([\w\d,-_]+)")?$/i, id: 'gh-issues.open', (msg) ->
     title = msg.match[1]

@@ -20,6 +20,31 @@ module.exports = (robot, scripts) ->
     msg.reply "I don't know your GitHub token. \nPlease generate one with the \"repo\" scope on https://github.com/settings/tokens and set it in a private message to me with the command: \"github token set <github_personal_access_token>\""
 
   robot.ghissues =
+    searchIssues: (msg, repo, assignee, state, labels, keyword) ->
+      token = githubTokenForUser msg
+      if token?
+        client = github.client token
+        ghsearch = client.search repo
+        query = keyword
+        if assignee
+          query += "+assignee:" + assignee
+        if repo
+          query += "+repo:" + repo
+        if state
+          query += "+state:" + state
+        for label in labels
+          query += "+label:" + label
+        console.log query
+        ghsearch.issues { "q": query, "sort": "created", "order": "asc"}, (err, data, headers) ->
+          unless err?
+            reply = "Found issues #{data.total_count} in #{repo}\n"
+            for issue in data.items
+              reply += "##{issue.number}: #{issue.title} (#{issue.state}) - #{issue.url}\n"
+            msg.reply reply
+          else
+            msg.reply "Error from GitHub API: #{err.body.message}"
+            return err
+
     openIssue: (msg, title, body, repo, labels) ->
       token = githubTokenForUser msg
       if token?
